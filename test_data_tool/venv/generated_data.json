@@ -1,0 +1,46 @@
+[
+    {
+        "Hobbies": "Painting",
+        "Age": 72,
+        "Address": "48764 Howard Forge Apt. 421, Vanessaside, VT 79393",
+        "Gender": "Example: male, female, non binary",
+        "Email": "kyleblair@example: example.com",
+        "Phone": "+1-657-281-5659x38778",
+        "Education": "PhD",
+        "Pets": "Golden Retriever",
+        "Random Strings": "VeRKOGFRrLKdVl"
+    },
+    {
+        "Hobbies": "Painting",
+        "Age": 69,
+        "Address": "Unit 8711 Box 5871, DPO AA 72756",
+        "Gender": "Example: male, female, non binary",
+        "Email": "jasmine85@example: example.com",
+        "Phone": "+1-839-789-4719",
+        "Education": "PhD",
+        "Pets": "Golden Retriever",
+        "Random Strings": "mjQbZndJghceKR"
+    },
+    {
+        "Hobbies": "Fishing",
+        "Age": 61,
+        "Address": "339 Riley Mission Suite 515, South Brendamouth, PR 25454",
+        "Gender": "Example: male, female, non binary",
+        "Email": "allennelson@example: example.com",
+        "Phone": "001-335-225-6012x309",
+        "Education": "example: High School",
+        "Pets": "Dachshund",
+        "Random Strings": "HFDutYbbXj"
+    },
+    {
+        "Hobbies": "Painting",
+        "Age": 25,
+        "Address": "086 Mary Cliff, North Deborah, MI 57657",
+        "Gender": "Example: male, female, non binary",
+        "Email": "brucemcdonald@example: example.com",
+        "Phone": "+1-416-734-5792x302",
+        "Education": "example: High School",
+        "Pets": "Doberman Pinscher",
+        "Random Strings": "nFxjyvDAqsRnDa"
+    }
+]
