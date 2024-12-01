@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox
 from data_generator import generate_data  # Assume this handles data generation
 import json
 
-#Tooltip Class
+# Tooltip Class
 class Tooltip:
     def __init__(self, widget, text):
         self.widget = widget
@@ -33,13 +33,31 @@ class Tooltip:
             self.tooltip_window.destroy()
             self.tooltip_window = None
 
+
 # Main Application Logic
 def launch_ui():
     # Variables to store user selections
     selected_fields = []
     field_constraints = {}
 
-    def add_placeholder(entry, placeholder):
+    # Fixed dimensions for the application window
+    window_width = 500  # Set a fixed width
+    window_height = 400  # Set a fixed height
+
+    placeholder_messages = {
+        "Hobbies": "example: sports, traveling",
+        "Age": "example: <30, >40, 30-40",
+        "Gender": "example: Male, Female, Non-Binary",
+        "Address": "example: Country: Romania",
+        "Phone": "example: Country: Romania",
+        "Email": "example: example.com",
+        "Education": "example: High School, Bachelor, Master, PhD",
+        "Pets": "example: dogs, cats",
+        "Random Strings": "example: Length: 10"
+    }
+
+    # Placeholder handling
+    def apply_placeholder(entry, placeholder):
         entry.insert(0, placeholder)
         entry.config(foreground="grey")
 
@@ -50,64 +68,60 @@ def launch_ui():
 
         def on_focus_out(event):
             if not entry.get():
-                add_placeholder(entry, placeholder)
+                entry.insert(0, placeholder)
+                entry.config(foreground="grey")
 
         entry.bind("<FocusIn>", on_focus_in)
         entry.bind("<FocusOut>", on_focus_out)
 
+    # Function to switch screens
+    def show_screen(current, target):
+        current.pack_forget()
+        target.pack(fill="both", expand=True)
+
+    # Second screen handler
     def show_second_screen():
-        # Collect selected field types
+        # Collect selected fields
         selected_fields.clear()
         for field, var in field_vars.items():
             if var.get():
                 selected_fields.append(field)
-        
-        # Validate: Ensure at least one field type is selected
+
+        # Validation: Ensure at least one field is selected
         if not selected_fields:
             messagebox.showerror("Error", "At least one field type must be selected.")
             return
-        
-        # Switch to second screen
-        first_screen.pack_forget()
-        second_screen.pack(fill="both", expand=True)
 
-        # Display selected fields with constraints text boxes
+        # Switch to second screen
+        show_screen(first_screen, second_screen)
+
+        # Display constraints inputs
         for widget in second_screen.winfo_children():
-            widget.destroy()  # Clear previous widgets
+            widget.destroy()
 
         row = 0
         for field in selected_fields:
             label = ttk.Label(second_screen, text=f"{field} Constraints (optional):")
             label.grid(row=row, column=0, padx=10, pady=5, sticky="w")
-            entry = ttk.Entry(second_screen, width=30)
+
+            entry = ttk.Entry(second_screen, width=40)
             entry.grid(row=row, column=1, padx=10, pady=5)
             constraint_entries[field] = entry
 
-            # Add a placeholder based on the field type
-            placeholder_messages = {
-                "Hobbies": "example: sports, traveling",
-                "Age": "example: <30, >40",
-                "Address": "example: Country: Romania",
-                "Gender": "example: male, female, non binary",
-                "Email": "example: example.com",
-                "Phone": "example: Country: Romania",
-                "Education": "example: High School, PhD",
-                "Pets": "example: dog, cat",
-                "Random Strings": "example: Length: 10"
-            }
-
-            # Get the placeholder message for the current field
-            placeholder_text = placeholder_messages.get(field, "Enter constraints if any")
-
-            # Add the placeholder to the entry
-            add_placeholder(entry, placeholder_text)
-
+            apply_placeholder(entry, placeholder_messages.get(field, "Enter constraints if any"))
             row += 1
 
-        # Add "Generate Data" button
-        generate_button = ttk.Button(second_screen, text="Generate Data", command=generate)
-        generate_button.grid(row=row, column=0, columnspan=2, pady=20)
+        # Generate Data Button
+        ttk.Button(second_screen, text="Generate Data", command=generate).grid(
+            row=row, column=0, columnspan=2, pady=20
+        )
 
+        # Back Button
+        ttk.Button(second_screen, text="Back", command=lambda: show_screen(second_screen, first_screen)).grid(
+            row=row + 1, column=0, columnspan=2, pady=10
+        )
+
+    # Data generation
     def generate():
         # Validate number of entries
         try:
@@ -118,21 +132,13 @@ def launch_ui():
             messagebox.showerror("Error", "Please enter a valid positive integer for the number of entries.")
             return
 
-        # Add a placeholder based on the field type
-        placeholder_messages = {
-        }
-
-        # Collect constraints for selected fields
-        field_constraints.clear()  # Ensure we start fresh
+        # Collect constraints
+        field_constraints.clear()
         for field in selected_fields:
-            entry_content = constraint_entries[field].get().strip()
-            placeholder_text = placeholder_messages.get(field, "Enter constraints if any")
-
-            # Treat placeholder or empty content as no constraint
-            if entry_content == "" or entry_content == placeholder_text:
-                field_constraints[field] = None  # No constraint
-            else:
-                field_constraints[field] = entry_content
+            entry = constraint_entries[field]
+            content = entry.get().strip()
+            placeholder = placeholder_messages.get(field, "Enter constraints if any")
+            field_constraints[field] = None if content == placeholder or not content else content
 
         # Generate data
         try:
@@ -146,24 +152,26 @@ def launch_ui():
     # Create the main window
     root = tk.Tk()
     root.title("Dynamic Test Data Generator")
+    root.geometry(f"{window_width}x{window_height}")  # Set fixed size
+    root.resizable(False, False)  # Disable resizing
+
+    # Helper function to center frames within the fixed width
+    def center_frame(frame):
+        frame.pack(fill="both", expand=True)
+        frame.place(relx=0.5, rely=0.5, anchor="center")
 
     # First screen
-    first_screen = tk.Frame(root)
-    first_screen.pack(fill="both", expand=True)
+    first_screen = tk.Frame(root, width=window_width, height=window_height)
+    center_frame(first_screen)
 
-    # Field type section
-    field_types = [
-        "Hobbies", "Age", "Address", "Gender", "Email", 
-        "Phone", "Education", "Pets", "Random Strings"
-    ]
-    field_vars = {field: tk.BooleanVar() for field in field_types}
+    field_vars = {field: tk.BooleanVar() for field in placeholder_messages.keys()}
     constraint_entries = {}
 
-    # Create the LabelFrame to hold checkboxes
-    field_frame = ttk.LabelFrame(first_screen, text="Select Field Types")
+    # Field selection frame
+    field_frame = ttk.LabelFrame(first_screen, text="Select Field Types", width=window_width)
     field_frame.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
-    # Add "Select All" checkbox
+    # Add "Select All" Checkbox
     select_all_var = tk.BooleanVar()
 
     def toggle_select_all():
@@ -187,21 +195,24 @@ def launch_ui():
     )
     select_all_checkbox.grid(row=0, column=0, sticky="w", padx=5, pady=5)
 
-    # Add individual field checkboxes below "Select All"
-    for idx, field in enumerate(field_types, start=1):
-        checkbox = ttk.Checkbutton(
+    # # Add individual field checkboxes below "Select All"
+    for idx, field in enumerate(placeholder_messages.keys(), start=1):
+        checkbox=ttk.Checkbutton(
             field_frame,
             text=field,
             variable=field_vars[field],
-            command=update_select_all  # Ensure "Select All" is updated on individual changes
+            command=update_select_all # Ensure "Select All" is updated on individual changes
         )
         checkbox.grid(row=idx, column=0, sticky="w", padx=5, pady=2)
 
     # Number of entries
     num_entries_label = ttk.Label(first_screen, text="Number of Entries:")
     num_entries_label.grid(row=1, column=0, padx=10, pady=5, sticky="w")
-    num_entries_entry = ttk.Entry(first_screen, width=10)
+    num_entries_entry = ttk.Entry(first_screen, width=40)
     num_entries_entry.grid(row=1, column=1, padx=10, pady=5, sticky="w")
+
+    # Set the default value of 5
+    num_entries_entry.insert(0, "5")  # Set the default value as 5
 
     # Next button to proceed to second screen
     next_button = ttk.Button(first_screen, text="Next", command=show_second_screen, state=tk.DISABLED)
@@ -214,21 +225,38 @@ def launch_ui():
     def validate_next_button():
         # Enable "Next" button only if num_entries_entry contains a valid positive integer
         try:
-            value = int(num_entries_entry.get())
+            value = int(num_entries_entry.get())  # Get the value entered by the user
             if value > 0:
-                next_button.config(state=tk.NORMAL)
-                tooltip.text = ""  # Hide tooltip when button is enabled
+                next_button.config(state=tk.NORMAL)  # Enable the button if the value is positive
+                tooltip.text = ""  # Clear the tooltip message when the button is enabled
             else:
-                next_button.config(state=tk.DISABLED)
+                next_button.config(state=tk.DISABLED)  # Disable if the value is not positive
                 tooltip.text = "Enter a positive integer to enable the button."
         except ValueError:
-            next_button.config(state=tk.DISABLED)
+            next_button.config(state=tk.DISABLED)  # Disable if the value is not a valid integer
             tooltip.text = "Enter a positive integer to enable the button."
 
     # Bind validation function to the entry widget
-    num_entries_entry.bind("<KeyRelease>", lambda event: validate_next_button())
+    num_entries_entry.bind("<KeyRelease>", lambda event: validate_next_button())  # Trigger on each key release
+
+    # Call validate_next_button to enable/disable the Next button based on the default value
+    validate_next_button()  # Check if the default value is valid and enable the button if it is
 
     # Second screen
-    second_screen = tk.Frame(root)
+    second_screen = tk.Frame(root, width=window_width, height=window_height)
+    
+    def show_second_screen():
+        # Switch to the second screen
+        first_screen.pack_forget()
+        center_frame(second_screen)
+
+        # Add back button to return to the first screen
+        back_button = ttk.Button(second_screen, text="Back", command=show_first_screen)
+        back_button.pack(pady=20)
+
+    def show_first_screen():
+        # Switch to the first screen
+        second_screen.pack_forget()
+        center_frame(first_screen)
 
     root.mainloop()
