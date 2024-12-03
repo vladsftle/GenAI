@@ -33,7 +33,6 @@ class Tooltip:
             self.tooltip_window.destroy()
             self.tooltip_window = None
 
-
 # Main Application Logic
 def launch_ui():
     # Variables to store user selections
@@ -74,13 +73,95 @@ def launch_ui():
         entry.bind("<FocusIn>", on_focus_in)
         entry.bind("<FocusOut>", on_focus_out)
 
-    # Function to switch screens
+    def show_third_screen():
+        # Clear the second screen and switch to the third screen
+        second_screen.pack_forget()
+        center_frame(third_screen)
+        show_screen(second_screen, third_screen)
+        
+        # Clear all children of the third screen
+        for widget in third_screen.winfo_children():
+            widget.destroy()
+
+        # Create a new Canvas and set its layout
+        canvas = tk.Canvas(third_screen)
+        canvas.pack(side="top", fill="both", expand=True)
+
+        # Create a frame inside the canvas for the scrollable content
+        scrollable_frame = ttk.Frame(canvas)
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+
+        # Create a vertical Scrollbar linked to the canvas
+        scrollbar = ttk.Scrollbar(canvas, orient="vertical", command=canvas.yview)
+        scrollbar.pack(side="right", fill="y")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        # Update the canvas scrollregion dynamically
+        def update_scroll_region():
+            canvas.update_idletasks()
+            canvas.config(scrollregion=scrollable_frame.bbox("all"))
+
+        # Generate and display data
+        try:
+            num_entries = int(num_entries_entry.get())
+            data = generate_data(selected_fields, field_constraints, num_entries)
+            formatted_data = json.dumps(data, indent=4)
+
+            # Display the generated data in a Text widget inside the scrollable frame
+            data_display = tk.Text(scrollable_frame, wrap="word", height=30, width=60)
+            data_display.insert("1.0", formatted_data)
+            data_display.configure(state="disabled")
+            data_display.pack(padx=10, pady=10)
+
+        except Exception as e:
+            error_label = tk.Label(scrollable_frame, text=f"Error: {e}", fg="red")
+            error_label.pack(padx=10, pady=10)
+
+        # "Back" button
+        back_button = ttk.Button(third_screen, text="Back", command=lambda: show_screen(third_screen, second_screen))
+        back_button.pack(side="bottom", padx=10)
+
+        # "Exit" button
+        exit_button = ttk.Button(third_screen, text="Exit", command=root.quit)
+        exit_button.pack(side="bottom", padx=10)
+
+        # Update the scrollable region
+        update_scroll_region()
+
     def show_screen(current, target):
+        # If leaving the third screen, explicitly destroy the canvas and scrollbar
+        if current == third_screen:
+            for widget in current.winfo_children():
+                widget.destroy()
+
+        # Hide the current screen and display the target screen
         current.pack_forget()
         target.pack(fill="both", expand=True)
 
+    # Create the main window
+    root = tk.Tk()
+    root.title("Dynamic Test Data Generator")
+    root.geometry(f"{window_width}x{window_height}")  # Set fixed size
+    root.resizable(False, False)  # Disable resizing
+
+    # Helper function to center frames within the fixed width
+    def center_frame(frame):
+        frame.pack(fill="both", expand=True)
+        frame.place(relx=0.5, rely=0.5, anchor="center")
+
+    # All screens
+    first_screen = tk.Frame(root, width=window_width, height=window_height)
+    center_frame(first_screen)
+    second_screen = tk.Frame(root)
+    center_frame(second_screen)
+    third_screen = tk.Frame(root)
+    center_frame(third_screen)
+
     # Second screen handler
     def show_second_screen():
+        first_screen.pack_forget()
+        center_frame(second_screen)
+
         # Collect selected fields
         selected_fields.clear()
         for field, var in field_vars.items():
@@ -111,58 +192,18 @@ def launch_ui():
             apply_placeholder(entry, placeholder_messages.get(field, "Enter constraints if any"))
             row += 1
 
-        # Generate Data Button
-        ttk.Button(second_screen, text="Generate Data", command=generate).grid(
-            row=row, column=0, columnspan=2, pady=20
-        )
-
         # Back Button
         ttk.Button(second_screen, text="Back", command=lambda: show_screen(second_screen, first_screen)).grid(
+            row=row, column=0, columnspan=2, pady=10
+        )
+        
+        # Generate Data Button
+        ttk.Button(second_screen, text="Generate Data", command=generate).grid(
             row=row + 1, column=0, columnspan=2, pady=10
         )
 
-    # Data generation
-    def generate():
-        # Validate number of entries
-        try:
-            num_entries = int(num_entries_entry.get())
-            if num_entries <= 0:
-                raise ValueError
-        except ValueError:
-            messagebox.showerror("Error", "Please enter a valid positive integer for the number of entries.")
-            return
-
-        # Collect constraints
-        field_constraints.clear()
-        for field in selected_fields:
-            entry = constraint_entries[field]
-            content = entry.get().strip()
-            placeholder = placeholder_messages.get(field, "Enter constraints if any")
-            field_constraints[field] = None if content == placeholder or not content else content
-
-        # Generate data
-        try:
-            data = generate_data(selected_fields, field_constraints, num_entries)
-            with open("generated_data.json", "w") as f:
-                json.dump(data, f, indent=4)
-            messagebox.showinfo("Success", "Test data generated successfully! Saved as 'generated_data.json'.")
-        except Exception as e:
-            messagebox.showerror("Error", f"An error occurred: {e}")
-
-    # Create the main window
-    root = tk.Tk()
-    root.title("Dynamic Test Data Generator")
-    root.geometry(f"{window_width}x{window_height}")  # Set fixed size
-    root.resizable(False, False)  # Disable resizing
-
-    # Helper function to center frames within the fixed width
-    def center_frame(frame):
-        frame.pack(fill="both", expand=True)
-        frame.place(relx=0.5, rely=0.5, anchor="center")
-
-    # First screen
-    first_screen = tk.Frame(root, width=window_width, height=window_height)
-    center_frame(first_screen)
+    # First screen handler
+    first_screen.pack(fill="both", expand=True)
 
     field_vars = {field: tk.BooleanVar() for field in placeholder_messages.keys()}
     constraint_entries = {}
@@ -179,6 +220,7 @@ def launch_ui():
         state = select_all_var.get()
         for var in field_vars.values():
             var.set(state)
+        validate_next_button()  # Update the "Next" button state
 
     def update_select_all():
         # Update "Select All" checkbox based on individual checkboxes
@@ -188,6 +230,7 @@ def launch_ui():
             select_all_var.set(False)
         else:
             select_all_var.set(False)
+        validate_next_button()  # Update the "Next" button state
 
     # Add the "Select All" checkbox
     select_all_checkbox = ttk.Checkbutton(
@@ -195,13 +238,13 @@ def launch_ui():
     )
     select_all_checkbox.grid(row=0, column=0, sticky="w", padx=5, pady=5)
 
-    # # Add individual field checkboxes below "Select All"
+    # Add individual field checkboxes below "Select All"
     for idx, field in enumerate(placeholder_messages.keys(), start=1):
         checkbox=ttk.Checkbutton(
             field_frame,
             text=field,
             variable=field_vars[field],
-            command=update_select_all # Ensure "Select All" is updated on individual changes
+            command=lambda: [update_select_all(), validate_next_button()] # Ensure "Select All"/"Next" is updated on individual changes
         )
         checkbox.grid(row=idx, column=0, sticky="w", padx=5, pady=2)
 
@@ -216,43 +259,71 @@ def launch_ui():
 
     # Next button to proceed to second screen
     next_button = ttk.Button(first_screen, text="Next", command=show_second_screen, state=tk.DISABLED)
-    next_button.grid(row=2, column=0, columnspan=2, pady=20)
+    next_button.grid(row=2, column=0, columnspan=2, pady=10)
 
     # Create the tooltip for the "Next" button
     tooltip = Tooltip(next_button, "Enter a positive integer to enable the button.")
 
     # Function to validate and enable/disable the Next button
     def validate_next_button():
-        # Enable "Next" button only if num_entries_entry contains a valid positive integer
         try:
+            # Validate the number of entries
             value = int(num_entries_entry.get())  # Get the value entered by the user
-            if value > 0:
-                next_button.config(state=tk.NORMAL)  # Enable the button if the value is positive
-                tooltip.text = ""  # Clear the tooltip message when the button is enabled
-            else:
-                next_button.config(state=tk.DISABLED)  # Disable if the value is not positive
-                tooltip.text = "Enter a positive integer to enable the button."
+            is_positive_integer = value > 0
         except ValueError:
-            next_button.config(state=tk.DISABLED)  # Disable if the value is not a valid integer
-            tooltip.text = "Enter a positive integer to enable the button."
+            is_positive_integer = False
+
+        # Check if at least one checkbox is selected
+        is_field_selected = any(var.get() for var in field_vars.values())
+
+        # Update "Next" button state based on both conditions
+        if is_field_selected and is_positive_integer:
+            next_button.config(state=tk.NORMAL)
+            tooltip.text = ""  # Clear the tooltip message when the button is enabled
+        else:
+            next_button.config(state=tk.DISABLED)
+            if not is_field_selected:
+                tooltip.text = "At least one field type must be selected."
+            elif not is_positive_integer:
+                tooltip.text = "Enter a positive integer to enable the button."
 
     # Bind validation function to the entry widget
     num_entries_entry.bind("<KeyRelease>", lambda event: validate_next_button())  # Trigger on each key release
 
     # Call validate_next_button to enable/disable the Next button based on the default value
     validate_next_button()  # Check if the default value is valid and enable the button if it is
-
-    # Second screen
-    second_screen = tk.Frame(root, width=window_width, height=window_height)
     
-    def show_second_screen():
-        # Switch to the second screen
-        first_screen.pack_forget()
-        center_frame(second_screen)
+    # Data generation
+    def generate():
+        try:
+            # Validate number of entries
+            num_entries = int(num_entries_entry.get())
+            if num_entries <= 0:
+                raise ValueError
 
-        # Add back button to return to the first screen
-        back_button = ttk.Button(second_screen, text="Back", command=show_first_screen)
-        back_button.pack(pady=20)
+            # Collect constraints
+            field_constraints.clear()
+            for field in selected_fields:
+                entry = constraint_entries[field]
+                content = entry.get().strip()
+                placeholder = placeholder_messages.get(field, "Enter constraints if any")
+                field_constraints[field] = None if content == placeholder or not content else content
+
+            # Generate data and navigate to third screen
+            data = generate_data(selected_fields, field_constraints, num_entries)
+            show_third_screen()
+
+            # Save to file
+            with open("generated_data.json", "w") as f:
+                json.dump(data, f, indent=4)
+
+            # Display success message
+            messagebox.showinfo("Success", "Test data generated successfully! Saved as 'generated_data.json'.")
+
+        except ValueError:
+            messagebox.showerror("Error", "Please enter a valid positive integer for the number of entries.")
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {e}")
 
     def show_first_screen():
         # Switch to the first screen

@@ -1,46 +1,57 @@
 [
     {
         "Hobbies": "Painting",
-        "Age": 72,
-        "Address": "48764 Howard Forge Apt. 421, Vanessaside, VT 79393",
-        "Gender": "Example: male, female, non binary",
-        "Email": "kyleblair@example: example.com",
-        "Phone": "+1-657-281-5659x38778",
+        "Age": 61,
+        "Gender": "Female",
+        "Address": "74822 Drake Ports, Savageburgh, OR 33661",
+        "Phone": "328.232.7374x09970",
+        "Email": "lancewaters@example.org",
         "Education": "PhD",
-        "Pets": "Golden Retriever",
-        "Random Strings": "VeRKOGFRrLKdVl"
+        "Pets": "Hamster",
+        "Random Strings": "AcWZofGHqePy"
+    },
+    {
+        "Hobbies": "Photography",
+        "Age": 30,
+        "Gender": "Female",
+        "Address": "632 Perez Points Suite 810, Steelemouth, NV 00865",
+        "Phone": "487.521.4972",
+        "Email": "jennifer02@example.org",
+        "Education": "Bachelor",
+        "Pets": "Dog",
+        "Random Strings": "vfjkMTwuEsigofI"
     },
     {
         "Hobbies": "Painting",
-        "Age": 69,
-        "Address": "Unit 8711 Box 5871, DPO AA 72756",
-        "Gender": "Example: male, female, non binary",
-        "Email": "jasmine85@example: example.com",
-        "Phone": "+1-839-789-4719",
-        "Education": "PhD",
-        "Pets": "Golden Retriever",
-        "Random Strings": "mjQbZndJghceKR"
+        "Age": 65,
+        "Gender": "Non-binary",
+        "Address": "46438 Grant Estate Suite 141, Lake Davidport, CT 49820",
+        "Phone": "(913)316-1043x12751",
+        "Email": "stacyhunter@example.com",
+        "Education": "Master",
+        "Pets": "Rabbit",
+        "Random Strings": "kOjRqanwssQ"
+    },
+    {
+        "Hobbies": "Gardening",
+        "Age": 71,
+        "Gender": "Female",
+        "Address": "651 Lauren Grove Suite 301, Martinezville, FL 35161",
+        "Phone": "(949)283-7699",
+        "Email": "robersonsamantha@example.com",
+        "Education": "Bachelor",
+        "Pets": "Guinea pig",
+        "Random Strings": "DRwvDTgIsStUEnA"
     },
     {
         "Hobbies": "Fishing",
-        "Age": 61,
-        "Address": "339 Riley Mission Suite 515, South Brendamouth, PR 25454",
-        "Gender": "Example: male, female, non binary",
-        "Email": "allennelson@example: example.com",
-        "Phone": "001-335-225-6012x309",
-        "Education": "example: High School",
-        "Pets": "Dachshund",
-        "Random Strings": "HFDutYbbXj"
-    },
-    {
-        "Hobbies": "Painting",
-        "Age": 25,
-        "Address": "086 Mary Cliff, North Deborah, MI 57657",
-        "Gender": "Example: male, female, non binary",
-        "Email": "brucemcdonald@example: example.com",
-        "Phone": "+1-416-734-5792x302",
-        "Education": "example: High School",
-        "Pets": "Doberman Pinscher",
-        "Random Strings": "nFxjyvDAqsRnDa"
+        "Age": 29,
+        "Gender": "Male",
+        "Address": "7522 Perez Mountain Suite 150, Lake Andrea, VT 66827",
+        "Phone": "716-233-7241",
+        "Email": "zhardy@example.com",
+        "Education": "Master",
+        "Pets": "Hamster",
+        "Random Strings": "IkfmlLBuNaFVjjb"
     }
 ]
